@@ -1,4 +1,4 @@
-wandb offline # Close wandb
+wandb online # Close wandb
 # a100 ,单卡
 current_date=$(date +"%Y%m%d_%H%M")
 train_log="dbgpt_hub/output/logs/train_sft_test_${current_date}.log"
@@ -15,12 +15,13 @@ dataset="example_text2sql_train"
 if [ "$num_shot" -eq 1 ]; then
     dataset="example_text2sql_train_one_shot"
 fi
-model_name_or_path="Your_download_CodeLlama-13b-Instruct-hf_path"
-output_dir="dbgpt_hub/output/adapter/CodeLlama-13b-sql-lora"
+model_name_or_path="/home/data/hf_cache/hub/models--codellama--CodeLlama-13b-Instruct-hf/snapshots/745795438019e47e4dad1347a0093e11deee4c68"
+output_dir="/home/data/dbgpt_hub/output/adapter/CodeLlama-13b-sql-lora"
 
 # the default param set could be run in a server with one a100(40G) gpu, if your server not support the set,you can set smaller param such as  lora_rank and use qlora with quant 4 eg...
 CUDA_VISIBLE_DEVICES=0 python dbgpt_hub/train/sft_train.py \
     --model_name_or_path $model_name_or_path \
+    --quantization_bit 8 \
     --do_train \
     --dataset $dataset \
     --max_source_length 2048 \
@@ -36,7 +37,7 @@ CUDA_VISIBLE_DEVICES=0 python dbgpt_hub/train/sft_train.py \
     --per_device_train_batch_size 1 \
     --gradient_accumulation_steps 16 \
     --lr_scheduler_type cosine_with_restarts \
-    --logging_steps 50 \
+    --logging_steps 1 \
     --save_steps 2000 \
     --learning_rate 2e-4 \
     --num_train_epochs 8 \
